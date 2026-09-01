@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a0a2e;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Background arcade pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255, 0, 255, 0.1) 39px, rgba(255, 0, 255, 0.1) 40px),
+                repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0, 255, 255, 0.1) 39px, rgba(0, 255, 255, 0.1) 40px);
+            z-index: 0;
+        }
+
+        /* Arcade cabinet background */
+        .arcade-cabinet {
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(180deg, #2d1b4e 0%, #1a0a2e 100%);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 
+                0 0 40px rgba(255, 0, 255, 0.2),
+                0 0 80px rgba(0, 255, 255, 0.1),
+                inset 0 0 60px rgba(255, 0, 255, 0.05);
+            border: 4px solid #4a2a6a;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        /* Marquee light effect */
+        .marquee {
+            background: linear-gradient(90deg, #ff00ff, #00ffff, #ff00ff);
+            background-size: 300% 100%;
+            padding: 8px;
+            border-radius: 10px 10px 0 0;
+            animation: marqueeLight 2s linear infinite;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .marquee::after {
+            content: '✦ QUEST MAKER ✦ ARCADE ✦';
+            display: block;
+            background: #1a0a2e;
+            padding: 12px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #00ffff;
+            letter-spacing: 6px;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            font-family: 'Courier New', monospace;
+        }
+
+        @keyframes marqueeLight {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Main gameboard */
+        .gameboard {
+            background: linear-gradient(145deg, #0a0a1a, #1a1a3e);
+            border: 4px solid #4a2a6a;
+            border-radius: 12px;
+            padding: 30px;
+            position: relative;
+            box-shadow: 
+                inset 0 0 30px rgba(0, 255, 255, 0.05),
+                0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Grid pattern on gameboard */
+        .gameboard::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(0, 255, 255, 0.03) 19px, rgba(0, 255, 255, 0.03) 20px),
+                repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(255, 0, 255, 0.03) 19px, rgba(255, 0, 255, 0.03) 20px);
+            border-radius: 10px;
+            pointer-events: none;
+        }
+
+        /* Container chính - Arcade style */
+        .container {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        /* Arcade title */
+        .arcade-title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.3),
+                0 0 40px rgba(0, 255, 255, 0.1),
+                4px 4px 0 #4a2a6a,
+                -4px -4px 0 #ff00ff;
+            margin-bottom: 10px;
+            letter-spacing: 4px;
+            font-family: 'Courier New', monospace;
+            animation: titlePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); text-shadow: 0 0 30px rgba(0, 255, 255, 0.5), 0 0 60px rgba(0, 255, 255, 0.2), 4px 4px 0 #4a2a6a, -4px -4px 0 #ff00ff; }
+        }
+
+        /* Score display */
+        .score-display {
+            background: #0a0a1a;
+            border: 3px solid #4a2a6a;
+            padding: 12px 20px;
+            margin: 15px 0;
+            display: inline-block;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .score-label {
+            color: #ff00ff;
+            font-size: 0.9rem;
+            letter-spacing: 4px;
+        }
+
+        .score-value {
+            color: #00ffff;
+            font-size: 1.8rem;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            animation: scoreBlink 1.5s step-end infinite;
+        }
+
+        @keyframes scoreBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Subtitle arcade */
+        .subtitle {
+            color: #ff00ff;
+            font-size: 1.1rem;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(255, 0, 255, 0.05);
+            border: 2px solid #4a2a6a;
+            border-radius: 8px;
+            letter-spacing: 3px;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+            transition: all 0.5s ease;
+        }
+
+        /* Hiệu ứng hover - bo tròn và đổi màu */
+        .container:hover .subtitle {
+            color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+            border-color: #00ffff;
+            border-radius: 20px 5px 20px 5px;
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+        }
+
+        .container:hover .arcade-title {
+            color: #ff00ff;
+            text-shadow: 0 0 30px rgba(255, 0, 255, 0.5), 0 0 60px rgba(255, 0, 255, 0.2), 4px 4px 0 #00ffff, -4px -4px 0 #4a2a6a;
+        }
+
+        /* Nút arcade */
+        .btn-arcade {
+            display: inline-block;
+            padding: 18px 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            text-decoration: none;
+            position: relative;
+            margin-top: 20px;
+            background: linear-gradient(180deg, #ff00ff, #8a2be2);
+            color: #ffffff;
+            border: 4px solid #4a2a6a;
+            border-radius: 12px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            box-shadow: 
+                0 8px 0 #4a2a6a,
+                0 10px 30px rgba(255, 0, 255, 0.3);
+            transition: all 0.2s ease;
+            animation: btnPulse 2s ease-in-out infinite;
+        }
+
+        .btn-arcade::before {
+            content: '▶ ';
+        }
+
+        .btn-arcade::after {
+            content: ' ◀';
+        }
+
+        @keyframes btnPulse {
+            0%, 100% { box-shadow: 0 8px 0 #4a2a6a, 0 10px 30px rgba(255, 0, 255, 0.3); }
+            50% { box-shadow: 0 8px 0 #4a2a6a, 0 10px 50px rgba(255, 0, 255, 0.6); }
+        }
+
+        .btn-arcade:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 12px 0 #4a2a6a, 0 20px 40px rgba(0, 255, 255, 0.4);
+            background: linear-gradient(180deg, #00ffff, #00bfff);
+            border-color: #00ffff;
+            border-radius: 30px 5px 30px 5px;
+        }
+
+        .btn-arcade:active {
+            transform: translateY(4px) scale(0.95);
+            box-shadow: 0 4px 0 #4a2a6a, 0 5px 20px rgba(255, 0, 255, 0.2);
+            transition: all 0.05s ease;
+        }
+
+        /* Hiệu ứng click - bo tròn và đổi màu */
+        .container.active .gameboard {
+            border-color: #00ffff;
+            box-shadow: 
+                inset 0 0 50px rgba(0, 255, 255, 0.1),
+                0 0 60px rgba(0, 255, 255, 0.2);
+            border-radius: 50px 10px 50px 10px;
+        }
+
+        .container.active .arcade-title {
+            animation: titleExplode 0.8s ease-out;
+            color: #ff00ff;
+        }
+
+        @keyframes titleExplode {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.3) rotate(10deg); color: #00ffff; }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .container.active .subtitle {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+            border-radius: 30px 5px 30px 5px;
+            transform: scale(1.1);
+            color: #ffffff;
+        }
+
+        .container.active .btn-arcade {
+            background: linear-gradient(180deg, #00ffff, #00bfff);
+            border-color: #ffffff;
+            border-radius: 50px;
+            transform: scale(1.1) rotate(-5deg);
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.6), 0 8px 0 #4a2a6a;
+        }
+
+        /* Coin slot decoration */
+        .coin-slot {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 2px solid #4a2a6a;
+        }
+
+        .coin {
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b);
+            border-radius: 50%;
+            border: 2px solid #daa520;
+            animation: coinSpin 3s linear infinite;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .coin:nth-child(2) { animation-delay: 0.5s; }
+        .coin:nth-child(3) { animation-delay: 1s; }
+        .coin:nth-child(4) { animation-delay: 1.5s; }
+        .coin:nth-child(5) { animation-delay: 2s; }
+
+        @keyframes coinSpin {
+            0% { transform: rotateY(0deg) scale(1); }
+            50% { transform: rotateY(180deg) scale(1.1); box-shadow: 0 0 40px rgba(255, 215, 0, 0.5); }
+            100% { transform: rotateY(360deg) scale(1); }
+        }
+
+        /* Floating arcade particles */
+        .arcade-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .arcade-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #00ffff;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            animation: arcadeFloat linear infinite;
+            opacity: 0.3;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        @keyframes arcadeFloat {
+            0% {
+                transform: translateY(100vh) rotate(0deg) scale(1);
+                opacity: 0;
+            }
+            10% { opacity: 0.5; }
+            90% { opacity: 0.5; }
+            100% {
+                transform: translateY(-100vh) rotate(720deg) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        /* Ripple effect arcade */
+        .ripple-arcade {
+            position: absolute;
+            border: 3px solid #00ffff;
+            border-radius: 0;
+            transform: scale(0);
+            animation: rippleArcade 1s ease-out;
+            pointer-events: none;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        @keyframes rippleArcade {
+            to {
+                transform: scale(4) rotate(45deg);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .arcade-cabinet {
+                padding: 15px;
+            }
+            
+            .marquee::after {
+                font-size: 0.8rem;
+                letter-spacing: 3px;
+                padding: 10px;
+            }
+
+            .arcade-title {
+                font-size: 1.8rem;
+            }
+
+            .gameboard {
+                padding: 20px;
+            }
+
+            .btn-arcade {
+                padding: 15px 30px;
+                font-size: 0.8rem;
+            }
+
+            .coin {
+                width: 20px;
+                height: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Arcade Particles -->
+    <div class="arcade-particles" id="arcadeParticles"></div>
+
+    <!-- Arcade Cabinet -->
+    <div class="arcade-cabinet">
+        <!-- Marquee -->
+        <div class="marquee"></div>
+
+        <!-- Gameboard -->
+        <div class="gameboard" id="gameboard">
+            <div class="container" id="mainContainer">
+                <!-- Title -->
+                <div class="arcade-title">QUEST MAKER</div>
+
+                <!-- Score Display -->
+                <div class="score-display">
+                    <div class="score-label">★ SCORE ★</div>
+                    <div class="score-value" id="scoreValue">000000</div>
+                </div>
+
+                <!-- Subtitle -->
+                <div class="subtitle">► PRESS START ◄</div>
+
+                <!-- Arcade Button -->
+                <a href="https://vuotnhanh.com/RxIa" class="btn-arcade" target="_blank" id="arcadeBtn">
+                    START QUEST
+                </a>
+
+                <!-- Coin Slot -->
+                <div class="coin-slot">
+                    <div class="coin"></div>
+                    <div class="coin"></div>
+                    <div class="coin"></div>
+                    <div class="coin"></div>
+                    <div class="coin"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tạo arcade particles
+        function createArcadeParticles() {
+            const container = document.getElementById('arcadeParticles');
+            const colors = ['#00ffff', '#ff00ff', '#00ff88', '#ff8800', '#ffff00'];
+            
+            for (let i = 0; i < 25; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'arcade-particle';
+                
+                const size = Math.random() * 8 + 4;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.boxShadow = `0 0 20px ${particle.style.background}`;
+                
+                const duration = Math.random() * 15 + 10;
+                particle.style.animationDuration = duration + 's';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                
+                container.appendChild(particle);
+            }
+        }
+
+        // Tạo hiệu ứng ripple arcade
+        function createArcadeRipple(event, element) {
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple-arcade';
+            
+            const rect = element.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (event.clientX - rect.left - size/2) + 'px';
+            ripple.style.top = (event.clientY - rect.top - size/2) + 'px';
+            
+            element.style.position = 'relative';
+            element.style.overflow = 'hidden';
+            element.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 1000);
+        }
+
+        // Tăng điểm khi click
+        let score = 0;
+        function updateScore() {
+            score += Math.floor(Math.random() * 100) + 1;
+            const scoreDisplay = document.getElementById('scoreValue');
+            scoreDisplay.textContent = String(score).padStart(6, '0');
+            
+            // Hiệu ứng nhấp nháy khi tăng điểm
+            scoreDisplay.style.animation = 'none';
+            setTimeout(() => {
+                scoreDisplay.style.animation = 'scoreBlink 1.5s step-end infinite';
+            }, 10);
+        }
+
+        // Thêm event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            createArcadeParticles();
+            
+            const container = document.getElementById('mainContainer');
+            const gameboard = document.getElementById('gameboard');
+            const btn = document.getElementById('arcadeBtn');
+            
+            // Click effect
+            container.addEventListener('click', function(e) {
+                // Thêm class active
+                this.classList.add('active');
+                
+                // Tạo ripple
+                createArcadeRipple(e, gameboard);
+                
+                // Tăng điểm
+                updateScore();
+                
+                // Tạo burst particles
+                for (let i = 0; i < 15; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'arcade-particle';
+                    const size = Math.random() * 10 + 5;
+                    particle.style.width = size + 'px';
+                    particle.style.height = size + 'px';
+                    particle.style.left = (e.clientX / window.innerWidth * 100) + '%';
+                    particle.style.top = (e.clientY / window.innerHeight * 100) + '%';
+                    const colors = ['#00ffff', '#ff00ff', '#00ff88', '#ff8800', '#ffff00'];
+                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    particle.style.boxShadow = `0 0 30px ${particle.style.background}`;
+                    particle.style.animationDuration = (Math.random() * 2 + 1) + 's';
+                    particle.style.position = 'fixed';
+                    particle.style.zIndex = '100';
+                    document.body.appendChild(particle);
+                    
+                    setTimeout(() => {
+                        particle.remove();
+                    }, 2000);
+                }
+                
+                // Xóa class active sau 2s
+                setTimeout(() => {
+                    this.classList.remove('active');
+                }, 2000);
+            });
+            
+            // Mouse move effect - nhẹ nhàng hơn
+            document.addEventListener('mousemove', (e) => {
+                const rect = gameboard.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                const deltaX = (e.clientX - centerX) / 50;
+                const deltaY = (e.clientY - centerY) / 50;
+                
+                if (!container.classList.contains('active')) {
+                    container.style.transform = `translate(${deltaX * 0.5}px, ${deltaY * 0.5}px)`;
+                }
+            });
+            
+            // Reset transform
+            document.addEventListener('mouseleave', () => {
+                if (!container.classList.contains('active')) {
+                    container.style.transform = 'translate(0, 0)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
