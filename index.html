@@ -1,581 +1,477 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arcade Game</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donate – Ủng hộ tác giả</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, system-ui, sans-serif; }
 
-        body {
-            font-family: 'Courier New', monospace;
-            background: #1a0a2e;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            overflow: hidden;
-            position: relative;
-        }
+  body {
+    min-height: 100vh;
+    background: radial-gradient(circle at 20% 30%, #1a1e2e, #0b0d14 80%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    color: #eef2ff;
+  }
 
-        /* Background arcade pattern */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255, 0, 255, 0.1) 39px, rgba(255, 0, 255, 0.1) 40px),
-                repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(0, 255, 255, 0.1) 39px, rgba(0, 255, 255, 0.1) 40px);
-            z-index: 0;
-        }
+  /* Thanh loading trên cùng */
+  .loader-bar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    background: linear-gradient(90deg, transparent, #6c8cff, #b56cff, transparent);
+    animation: loadPulse 2s infinite ease-in-out;
+    z-index: 999;
+  }
+  @keyframes loadPulse {
+    0% { opacity: 0.3; transform: translateX(-100%); }
+    50% { opacity: 1; transform: translateX(0); }
+    100% { opacity: 0.3; transform: translateX(100%); }
+  }
 
-        /* Arcade cabinet background */
-        .arcade-cabinet {
-            position: relative;
-            z-index: 1;
-            background: linear-gradient(180deg, #2d1b4e 0%, #1a0a2e 100%);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 
-                0 0 40px rgba(255, 0, 255, 0.2),
-                0 0 80px rgba(0, 255, 255, 0.1),
-                inset 0 0 60px rgba(255, 0, 255, 0.05);
-            border: 4px solid #4a2a6a;
-            max-width: 600px;
-            width: 100%;
-        }
+  /* Container chính */
+  .donate-container {
+    max-width: 720px;
+    width: 100%;
+    background: rgba(20, 24, 38, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(108, 140, 255, 0.2);
+    border-radius: 32px;
+    padding: 40px 28px;
+    box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.6),
+                0 0 0 1px rgba(108, 140, 255, 0.15) inset;
+  }
 
-        /* Marquee light effect */
-        .marquee {
-            background: linear-gradient(90deg, #ff00ff, #00ffff, #ff00ff);
-            background-size: 300% 100%;
-            padding: 8px;
-            border-radius: 10px 10px 0 0;
-            animation: marqueeLight 2s linear infinite;
-            margin-bottom: 20px;
-            position: relative;
-            overflow: hidden;
-        }
+  /* Header */
+  .donate-header { text-align: center; margin-bottom: 32px; }
 
-        .marquee::after {
-            content: '✦ QUEST MAKER ✦ ARCADE ✦';
-            display: block;
-            background: #1a0a2e;
-            padding: 12px;
-            text-align: center;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #00ffff;
-            letter-spacing: 6px;
-            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-            font-family: 'Courier New', monospace;
-        }
+  .donate-header h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #ffffff, #b8c6ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
 
-        @keyframes marqueeLight {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
+  .donate-header h1 span { font-size: 1.9rem; filter: drop-shadow(0 0 8px #6c8cff); }
 
-        /* Main gameboard */
-        .gameboard {
-            background: linear-gradient(145deg, #0a0a1a, #1a1a3e);
-            border: 4px solid #4a2a6a;
-            border-radius: 12px;
-            padding: 30px;
-            position: relative;
-            box-shadow: 
-                inset 0 0 30px rgba(0, 255, 255, 0.05),
-                0 10px 30px rgba(0, 0, 0, 0.5);
-        }
+  .donate-header p {
+    color: #9aa6d4;
+    font-size: 1rem;
+    padding-bottom: 16px;
+    border-bottom: 1px dashed rgba(108, 140, 255, 0.25);
+    display: inline-block;
+  }
 
-        /* Grid pattern on gameboard */
-        .gameboard::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: 
-                repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(0, 255, 255, 0.03) 19px, rgba(0, 255, 255, 0.03) 20px),
-                repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(255, 0, 255, 0.03) 19px, rgba(255, 0, 255, 0.03) 20px);
-            border-radius: 10px;
-            pointer-events: none;
-        }
+  /* Tab chọn phương thức */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    background: rgba(15, 20, 35, 0.7);
+    padding: 6px;
+    border-radius: 16px;
+    border: 1px solid rgba(108, 140, 255, 0.15);
+    margin-bottom: 24px;
+  }
 
-        /* Container chính - Arcade style */
-        .container {
-            text-align: center;
-            position: relative;
-            z-index: 2;
-            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
+  .tab {
+    flex: 1;
+    padding: 12px 10px;
+    text-align: center;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #8b97c2;
+    transition: all 0.2s;
+    user-select: none;
+  }
 
-        /* Arcade title */
-        .arcade-title {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #00ffff;
-            text-shadow: 
-                0 0 20px rgba(0, 255, 255, 0.3),
-                0 0 40px rgba(0, 255, 255, 0.1),
-                4px 4px 0 #4a2a6a,
-                -4px -4px 0 #ff00ff;
-            margin-bottom: 10px;
-            letter-spacing: 4px;
-            font-family: 'Courier New', monospace;
-            animation: titlePulse 2s ease-in-out infinite;
-        }
+  .tab:hover { color: #b8c6ff; background: rgba(108, 140, 255, 0.08); }
 
-        @keyframes titlePulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); text-shadow: 0 0 30px rgba(0, 255, 255, 0.5), 0 0 60px rgba(0, 255, 255, 0.2), 4px 4px 0 #4a2a6a, -4px -4px 0 #ff00ff; }
-        }
+  .tab.active {
+    background: linear-gradient(135deg, #5f7cff, #9f5eff);
+    color: #fff;
+    box-shadow: 0 6px 16px -6px #6c8cff;
+  }
 
-        /* Score display */
-        .score-display {
-            background: #0a0a1a;
-            border: 3px solid #4a2a6a;
-            padding: 12px 20px;
-            margin: 15px 0;
-            display: inline-block;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-        }
+  /* Panel nội dung */
+  .panel { display: none; animation: fadeIn 0.3s ease; }
+  .panel.active { display: block; }
 
-        .score-label {
-            color: #ff00ff;
-            font-size: 0.9rem;
-            letter-spacing: 4px;
-        }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-        .score-value {
-            color: #00ffff;
-            font-size: 1.8rem;
-            font-weight: bold;
-            text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-            animation: scoreBlink 1.5s step-end infinite;
-        }
+  /* Form */
+  .form-group { margin-bottom: 18px; }
 
-        @keyframes scoreBlink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
+  .form-group label {
+    display: block;
+    font-size: 0.88rem;
+    color: #a5b0d9;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
 
-        /* Subtitle arcade */
-        .subtitle {
-            color: #ff00ff;
-            font-size: 1.1rem;
-            margin: 15px 0;
-            padding: 10px;
-            background: rgba(255, 0, 255, 0.05);
-            border: 2px solid #4a2a6a;
-            border-radius: 8px;
-            letter-spacing: 3px;
-            font-family: 'Courier New', monospace;
-            text-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
-            transition: all 0.5s ease;
-        }
+  .form-group select,
+  .form-group input {
+    width: 100%;
+    background: #111624;
+    border: 1px solid #2f3b5c;
+    border-radius: 14px;
+    padding: 14px 16px;
+    color: #fff;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.2s;
+  }
 
-        /* Hiệu ứng hover - bo tròn và đổi màu */
-        .container:hover .subtitle {
-            color: #00ffff;
-            background: rgba(0, 255, 255, 0.1);
-            border-color: #00ffff;
-            border-radius: 20px 5px 20px 5px;
-            transform: scale(1.05);
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
-        }
+  .form-group select:focus,
+  .form-group input:focus {
+    border-color: #6c8cff;
+    box-shadow: 0 0 0 3px rgba(108, 140, 255, 0.2);
+  }
 
-        .container:hover .arcade-title {
-            color: #ff00ff;
-            text-shadow: 0 0 30px rgba(255, 0, 255, 0.5), 0 0 60px rgba(255, 0, 255, 0.2), 4px 4px 0 #00ffff, -4px -4px 0 #4a2a6a;
-        }
+  .form-group input::placeholder { color: #5b688b; }
 
-        /* Nút arcade */
-        .btn-arcade {
-            display: inline-block;
-            padding: 18px 50px;
-            font-size: 1rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            font-family: 'Courier New', monospace;
-            cursor: pointer;
-            text-decoration: none;
-            position: relative;
-            margin-top: 20px;
-            background: linear-gradient(180deg, #ff00ff, #8a2be2);
-            color: #ffffff;
-            border: 4px solid #4a2a6a;
-            border-radius: 12px;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
-            box-shadow: 
-                0 8px 0 #4a2a6a,
-                0 10px 30px rgba(255, 0, 255, 0.3);
-            transition: all 0.2s ease;
-            animation: btnPulse 2s ease-in-out infinite;
-        }
+  .form-group select option { background: #111624; color: #fff; }
 
-        .btn-arcade::before {
-            content: '▶ ';
-        }
+  /* Grid 2 cột cho mệnh giá */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
 
-        .btn-arcade::after {
-            content: ' ◀';
-        }
+  /* Nút submit */
+  .btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, #5f7cff, #9f5eff);
+    border: none;
+    border-radius: 60px;
+    padding: 16px;
+    font-weight: 700;
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 10px 20px -8px #3f4d9e;
+    letter-spacing: 0.3px;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
 
-        @keyframes btnPulse {
-            0%, 100% { box-shadow: 0 8px 0 #4a2a6a, 0 10px 30px rgba(255, 0, 255, 0.3); }
-            50% { box-shadow: 0 8px 0 #4a2a6a, 0 10px 50px rgba(255, 0, 255, 0.6); }
-        }
+  .btn-submit:hover:not(:disabled) {
+    filter: brightness(1.15);
+    box-shadow: 0 14px 26px -8px #6c8cff;
+    transform: translateY(-1px);
+  }
 
-        .btn-arcade:hover {
-            transform: translateY(-4px) scale(1.05);
-            box-shadow: 0 12px 0 #4a2a6a, 0 20px 40px rgba(0, 255, 255, 0.4);
-            background: linear-gradient(180deg, #00ffff, #00bfff);
-            border-color: #00ffff;
-            border-radius: 30px 5px 30px 5px;
-        }
+  .btn-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    filter: grayscale(0.4);
+  }
 
-        .btn-arcade:active {
-            transform: translateY(4px) scale(0.95);
-            box-shadow: 0 4px 0 #4a2a6a, 0 5px 20px rgba(255, 0, 255, 0.2);
-            transition: all 0.05s ease;
-        }
+  /* Thông báo */
+  .alert {
+    padding: 14px 16px;
+    border-radius: 14px;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+    display: none;
+    animation: fadeIn 0.3s ease;
+    line-height: 1.5;
+  }
 
-        /* Hiệu ứng click - bo tròn và đổi màu */
-        .container.active .gameboard {
-            border-color: #00ffff;
-            box-shadow: 
-                inset 0 0 50px rgba(0, 255, 255, 0.1),
-                0 0 60px rgba(0, 255, 255, 0.2);
-            border-radius: 50px 10px 50px 10px;
-        }
+  .alert.show { display: block; }
+  .alert.success { background: rgba(0, 200, 150, 0.12); border: 1px solid #00c896; color: #7dffcf; }
+  .alert.error   { background: rgba(255, 80, 80, 0.12); border: 1px solid #ff5050; color: #ffb0b0; }
+  .alert.info    { background: rgba(108, 140, 255, 0.12); border: 1px solid #6c8cff; color: #b8c6ff; }
 
-        .container.active .arcade-title {
-            animation: titleExplode 0.8s ease-out;
-            color: #ff00ff;
-        }
+  /* Box thông tin STK */
+  .info-box {
+    background: rgba(15, 20, 35, 0.7);
+    border: 1px solid rgba(108, 140, 255, 0.2);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
 
-        @keyframes titleExplode {
-            0% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.3) rotate(10deg); color: #00ffff; }
-            100% { transform: scale(1) rotate(0deg); }
-        }
+  .info-box .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed rgba(108, 140, 255, 0.15);
+    font-size: 0.92rem;
+  }
 
-        .container.active .subtitle {
-            background: rgba(0, 255, 255, 0.2);
-            border-color: #00ffff;
-            border-radius: 30px 5px 30px 5px;
-            transform: scale(1.1);
-            color: #ffffff;
-        }
+  .info-box .row:last-child { border-bottom: none; }
+  .info-box .row .label { color: #8b97c2; }
+  .info-box .row .value { color: #fff; font-weight: 600; user-select: all; }
 
-        .container.active .btn-arcade {
-            background: linear-gradient(180deg, #00ffff, #00bfff);
-            border-color: #ffffff;
-            border-radius: 50px;
-            transform: scale(1.1) rotate(-5deg);
-            box-shadow: 0 0 40px rgba(0, 255, 255, 0.6), 0 8px 0 #4a2a6a;
-        }
+  .copy-btn {
+    background: rgba(108, 140, 255, 0.15);
+    border: 1px solid rgba(108, 140, 255, 0.3);
+    color: #b8c6ff;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: 8px;
+  }
 
-        /* Coin slot decoration */
-        .coin-slot {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            border: 2px solid #4a2a6a;
-        }
+  .copy-btn:hover { background: rgba(108, 140, 255, 0.3); color: #fff; }
 
-        .coin {
-            width: 30px;
-            height: 30px;
-            background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b);
-            border-radius: 50%;
-            border: 2px solid #daa520;
-            animation: coinSpin 3s linear infinite;
-            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
-        }
+  /* Footer */
+  .footer-note {
+    margin-top: 26px;
+    text-align: center;
+    color: #68749b;
+    font-size: 0.82rem;
+    border-top: 1px solid rgba(108, 140, 255, 0.1);
+    padding-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
 
-        .coin:nth-child(2) { animation-delay: 0.5s; }
-        .coin:nth-child(3) { animation-delay: 1s; }
-        .coin:nth-child(4) { animation-delay: 1.5s; }
-        .coin:nth-child(5) { animation-delay: 2s; }
-
-        @keyframes coinSpin {
-            0% { transform: rotateY(0deg) scale(1); }
-            50% { transform: rotateY(180deg) scale(1.1); box-shadow: 0 0 40px rgba(255, 215, 0, 0.5); }
-            100% { transform: rotateY(360deg) scale(1); }
-        }
-
-        /* Floating arcade particles */
-        .arcade-particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .arcade-particle {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: #00ffff;
-            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-            animation: arcadeFloat linear infinite;
-            opacity: 0.3;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
-        }
-
-        @keyframes arcadeFloat {
-            0% {
-                transform: translateY(100vh) rotate(0deg) scale(1);
-                opacity: 0;
-            }
-            10% { opacity: 0.5; }
-            90% { opacity: 0.5; }
-            100% {
-                transform: translateY(-100vh) rotate(720deg) scale(0.5);
-                opacity: 0;
-            }
-        }
-
-        /* Ripple effect arcade */
-        .ripple-arcade {
-            position: absolute;
-            border: 3px solid #00ffff;
-            border-radius: 0;
-            transform: scale(0);
-            animation: rippleArcade 1s ease-out;
-            pointer-events: none;
-            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-        }
-
-        @keyframes rippleArcade {
-            to {
-                transform: scale(4) rotate(45deg);
-                opacity: 0;
-            }
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .arcade-cabinet {
-                padding: 15px;
-            }
-            
-            .marquee::after {
-                font-size: 0.8rem;
-                letter-spacing: 3px;
-                padding: 10px;
-            }
-
-            .arcade-title {
-                font-size: 1.8rem;
-            }
-
-            .gameboard {
-                padding: 20px;
-            }
-
-            .btn-arcade {
-                padding: 15px 30px;
-                font-size: 0.8rem;
-            }
-
-            .coin {
-                width: 20px;
-                height: 20px;
-            }
-        }
-    </style>
+  /* Responsive */
+  @media (max-width: 500px) {
+    .donate-container { padding: 28px 18px; border-radius: 24px; }
+    .donate-header h1 { font-size: 1.6rem; }
+    .form-row { grid-template-columns: 1fr; }
+    .tab { font-size: 0.8rem; padding: 10px 6px; }
+  }
+</style>
 </head>
 <body>
-    <!-- Arcade Particles -->
-    <div class="arcade-particles" id="arcadeParticles"></div>
 
-    <!-- Arcade Cabinet -->
-    <div class="arcade-cabinet">
-        <!-- Marquee -->
-        <div class="marquee"></div>
+<div class="loader-bar"></div>
 
-        <!-- Gameboard -->
-        <div class="gameboard" id="gameboard">
-            <div class="container" id="mainContainer">
-                <!-- Title -->
-                <div class="arcade-title">QUEST MAKER</div>
+<div class="donate-container">
+  <!-- Header -->
+  <div class="donate-header">
+    <h1><span>💖</span> Ủng hộ tác giả</h1>
+    <p>Mỗi đóng góp đều giúp duy trì và phát triển dự án</p>
+  </div>
 
-                <!-- Score Display -->
-                <div class="score-display">
-                    <div class="score-label">★ SCORE ★</div>
-                    <div class="score-value" id="scoreValue">000000</div>
-                </div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="card">💳 Thẻ cào</div>
+    <div class="tab" data-tab="bank">🏦 Chuyển khoản</div>
+    <div class="tab" data-tab="momo">📱 Momo</div>
+  </div>
 
-                <!-- Subtitle -->
-                <div class="subtitle">► PRESS START ◄</div>
+  <!-- Alert chung -->
+  <div id="alertBox" class="alert"></div>
 
-                <!-- Arcade Button -->
-                <a href="https://vuotnhanh.com/RxIa" class="btn-arcade" target="_blank" id="arcadeBtn">
-                    START QUEST
-                </a>
-
-                <!-- Coin Slot -->
-                <div class="coin-slot">
-                    <div class="coin"></div>
-                    <div class="coin"></div>
-                    <div class="coin"></div>
-                    <div class="coin"></div>
-                    <div class="coin"></div>
-                </div>
-            </div>
+  <!-- ============ PANEL 1: THẺ CÀO ============ -->
+  <div class="panel active" id="panel-card">
+    <form id="cardForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Loại thẻ</label>
+          <select id="loaithe" required>
+            <option value="">-- Chọn loại --</option>
+            <option value="VIETTEL">Viettel</option>
+            <option value="MOBIFONE">Mobifone</option>
+            <option value="VINAPHONE">Vinaphone</option>
+            <option value="VIETNAMOBILE">Vietnamobile</option>
+            <option value="GARENA">Garena</option>
+          </select>
         </div>
+        <div class="form-group">
+          <label>Mệnh giá</label>
+          <select id="menhgia" required>
+            <option value="">-- Chọn mệnh giá --</option>
+            <option value="10000">10.000đ</option>
+            <option value="20000">20.000đ</option>
+            <option value="30000">30.000đ</option>
+            <option value="50000">50.000đ</option>
+            <option value="100000">100.000đ</option>
+            <option value="200000">200.000đ</option>
+            <option value="500000">500.000đ</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Số serial</label>
+        <input type="text" id="seri" placeholder="Nhập số serial in trên thẻ" required autocomplete="off">
+      </div>
+
+      <div class="form-group">
+        <label>Mã thẻ</label>
+        <input type="text" id="mathe" placeholder="Nhập mã thẻ (số bí mật)" required autocomplete="off">
+      </div>
+
+      <button type="submit" class="btn-submit" id="btnCard">
+        ❤️ Gửi thẻ ủng hộ
+      </button>
+    </form>
+  </div>
+
+  <!-- ============ PANEL 2: CHUYỂN KHOẢN ============ -->
+  <div class="panel" id="panel-bank">
+    <div class="info-box">
+      <div class="row">
+        <span class="label">Ngân hàng</span>
+        <span class="value">Vietcombank <button class="copy-btn" data-copy="Vietcombank">Copy</button></span>
+      </div>
+      <div class="row">
+        <span class="label">Số tài khoản</span>
+        <span class="value">1234567890 <button class="copy-btn" data-copy="1234567890">Copy</button></span>
+      </div>
+      <div class="row">
+        <span class="label">Chủ tài khoản</span>
+        <span class="value">NGUYEN VAN A</span>
+      </div>
+      <div class="row">
+        <span class="label">Chi nhánh</span>
+        <span class="value">Hà Nội</span>
+      </div>
     </div>
+    <div class="alert info show">
+      📌 Nội dung chuyển khoản: <b>DONATE [Tên bạn]</b> để mình cảm ơn nhé!
+    </div>
+  </div>
 
-    <script>
-        // Tạo arcade particles
-        function createArcadeParticles() {
-            const container = document.getElementById('arcadeParticles');
-            const colors = ['#00ffff', '#ff00ff', '#00ff88', '#ff8800', '#ffff00'];
-            
-            for (let i = 0; i < 25; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'arcade-particle';
-                
-                const size = Math.random() * 8 + 4;
-                particle.style.width = size + 'px';
-                particle.style.height = size + 'px';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                particle.style.boxShadow = `0 0 20px ${particle.style.background}`;
-                
-                const duration = Math.random() * 15 + 10;
-                particle.style.animationDuration = duration + 's';
-                particle.style.animationDelay = Math.random() * 10 + 's';
-                
-                container.appendChild(particle);
-            }
-        }
+  <!-- ============ PANEL 3: MOMO ============ -->
+  <div class="panel" id="panel-momo">
+    <div class="info-box">
+      <div class="row">
+        <span class="label">Số điện thoại Momo</span>
+        <span class="value">0987654321 <button class="copy-btn" data-copy="0987654321">Copy</button></span>
+      </div>
+      <div class="row">
+        <span class="label">Chủ ví</span>
+        <span class="value">NGUYEN VAN A</span>
+      </div>
+    </div>
+    <div class="alert info show">
+      📌 Mở app Momo → Chuyển tiền → Nhập SĐT trên → Ghi chú "DONATE" nhé!
+    </div>
+  </div>
 
-        // Tạo hiệu ứng ripple arcade
-        function createArcadeRipple(event, element) {
-            const ripple = document.createElement('span');
-            ripple.className = 'ripple-arcade';
-            
-            const rect = element.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = (event.clientX - rect.left - size/2) + 'px';
-            ripple.style.top = (event.clientY - rect.top - size/2) + 'px';
-            
-            element.style.position = 'relative';
-            element.style.overflow = 'hidden';
-            element.appendChild(ripple);
-            
-            setTimeout(() => {
-                ripple.remove();
-            }, 1000);
-        }
+  <!-- Footer -->
+  <div class="footer-note">
+    <span>🔒 Giao dịch an toàn</span>
+    <span>⚡ Xử lý tự động</span>
+    <span>🙏 Cảm ơn bạn!</span>
+  </div>
+</div>
 
-        // Tăng điểm khi click
-        let score = 0;
-        function updateScore() {
-            score += Math.floor(Math.random() * 100) + 1;
-            const scoreDisplay = document.getElementById('scoreValue');
-            scoreDisplay.textContent = String(score).padStart(6, '0');
-            
-            // Hiệu ứng nhấp nháy khi tăng điểm
-            scoreDisplay.style.animation = 'none';
-            setTimeout(() => {
-                scoreDisplay.style.animation = 'scoreBlink 1.5s step-end infinite';
-            }, 10);
-        }
+<script>
+  // ============ ĐỔI URL BACKEND CỦA BẠN Ở ĐÂY ============
+  const API_BASE = 'https://donate-api-v4h1.onrender.com/';
+  // Khi deploy Render: 'https://ten-app.onrender.com'
+  // Khi test ngrok:     'https://abc123.ngrok.io'
+  // =======================================================
 
-        // Thêm event listeners
-        document.addEventListener('DOMContentLoaded', () => {
-            createArcadeParticles();
-            
-            const container = document.getElementById('mainContainer');
-            const gameboard = document.getElementById('gameboard');
-            const btn = document.getElementById('arcadeBtn');
-            
-            // Click effect
-            container.addEventListener('click', function(e) {
-                // Thêm class active
-                this.classList.add('active');
-                
-                // Tạo ripple
-                createArcadeRipple(e, gameboard);
-                
-                // Tăng điểm
-                updateScore();
-                
-                // Tạo burst particles
-                for (let i = 0; i < 15; i++) {
-                    const particle = document.createElement('div');
-                    particle.className = 'arcade-particle';
-                    const size = Math.random() * 10 + 5;
-                    particle.style.width = size + 'px';
-                    particle.style.height = size + 'px';
-                    particle.style.left = (e.clientX / window.innerWidth * 100) + '%';
-                    particle.style.top = (e.clientY / window.innerHeight * 100) + '%';
-                    const colors = ['#00ffff', '#ff00ff', '#00ff88', '#ff8800', '#ffff00'];
-                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                    particle.style.boxShadow = `0 0 30px ${particle.style.background}`;
-                    particle.style.animationDuration = (Math.random() * 2 + 1) + 's';
-                    particle.style.position = 'fixed';
-                    particle.style.zIndex = '100';
-                    document.body.appendChild(particle);
-                    
-                    setTimeout(() => {
-                        particle.remove();
-                    }, 2000);
-                }
-                
-                // Xóa class active sau 2s
-                setTimeout(() => {
-                    this.classList.remove('active');
-                }, 2000);
-            });
-            
-            // Mouse move effect - nhẹ nhàng hơn
-            document.addEventListener('mousemove', (e) => {
-                const rect = gameboard.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                
-                const deltaX = (e.clientX - centerX) / 50;
-                const deltaY = (e.clientY - centerY) / 50;
-                
-                if (!container.classList.contains('active')) {
-                    container.style.transform = `translate(${deltaX * 0.5}px, ${deltaY * 0.5}px)`;
-                }
-            });
-            
-            // Reset transform
-            document.addEventListener('mouseleave', () => {
-                if (!container.classList.contains('active')) {
-                    container.style.transform = 'translate(0, 0)';
-                }
-            });
-        });
-    </script>
+  // --- Tabs ---
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+      hideAlert();
+    });
+  });
+
+  // --- Hiển thị thông báo ---
+  function showAlert(message, type = 'info') {
+    const box = document.getElementById('alertBox');
+    box.className = 'alert ' + type + ' show';
+    box.innerHTML = message;
+  }
+
+  function hideAlert() {
+    document.getElementById('alertBox').className = 'alert';
+  }
+
+  // --- Copy button ---
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => {
+        const old = btn.textContent;
+        btn.textContent = '✓ Đã copy';
+        setTimeout(() => btn.textContent = old, 1500);
+      });
+    });
+  });
+
+  // --- Submit form thẻ cào ---
+  const cardForm = document.getElementById('cardForm');
+  const btnCard = document.getElementById('btnCard');
+
+  cardForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideAlert();
+
+    const data = {
+      loaithe: document.getElementById('loaithe').value,
+      menhgia: document.getElementById('menhgia').value,
+      seri: document.getElementById('seri').value.trim(),
+      mathe: document.getElementById('mathe').value.trim()
+    };
+
+    // Validate phía client
+    if (!data.loaithe || !data.menhgia || !data.seri || !data.mathe) {
+      showAlert('⚠️ Vui lòng điền đầy đủ thông tin thẻ', 'error');
+      return;
+    }
+    if (data.seri.length < 6 || data.mathe.length < 6) {
+      showAlert('⚠️ Serial hoặc mã thẻ không hợp lệ', 'error');
+      return;
+    }
+
+    btnCard.disabled = true;
+    btnCard.innerHTML = '⏳ Đang xử lý...';
+
+    try {
+      const res = await fetch(API_BASE + '/api/nap-the', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        showAlert('✅ ' + result.message + '<br><small>Mã đơn: ' + (result.request_id || 'N/A') + '</small>', 'success');
+        cardForm.reset();
+      } else {
+        showAlert('❌ ' + (result.message || 'Có lỗi xảy ra'), 'error');
+      }
+    } catch (err) {
+      console.error(err);
+      showAlert('❌ Không kết nối được server. Vui lòng thử lại sau.', 'error');
+    } finally {
+      btnCard.disabled = false;
+      btnCard.innerHTML = '❤️ Gửi thẻ ủng hộ';
+    }
+  });
+</script>
 </body>
 </html>
