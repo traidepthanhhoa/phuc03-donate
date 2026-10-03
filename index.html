@@ -1,81 +1,441 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Trang donate bằng thẻ cào">
-  <title>Donate bằng thẻ cào</title>
+
+  <title>Script Hub — Roblox Scripts 🎃</title>
+  <meta
+    name="description"
+    content="Thư viện Roblox Script phong cách Halloween."
+  >
+  <meta name="theme-color" content="#0d0710">
+
+  <script>
+    (() => {
+      try {
+        const stored = localStorage.getItem("theme");
+        const prefersDark = window.matchMedia(
+          "(prefers-color-scheme: dark)"
+        ).matches;
+
+        document.documentElement.dataset.theme =
+          stored || (prefersDark ? "dark" : "light");
+      } catch {
+        document.documentElement.dataset.theme = "dark";
+      }
+    })();
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Creepster&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+    rel="stylesheet"
+  >
+
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <div class="bg-grid"></div>
+
+  <!-- =======================================================
+       READING PROGRESS
+  ======================================================== -->
+
+  <div class="reading-progress" aria-hidden="true">
+    <div id="readingProgressFill"></div>
+  </div>
+
+
+  <!-- =======================================================
+       TOAST
+  ======================================================== -->
+
+  <div
+    class="toast-container"
+    id="toastContainer"
+    aria-live="polite"
+  ></div>
+
+
+  <!-- =======================================================
+       LOADER
+  ======================================================== -->
+
+  <div
+    class="loader"
+    id="loader"
+    role="status"
+    aria-live="polite"
+  >
+    <div class="loader-box">
+      <div class="spinner"></div>
+
+      <div class="loader-percent" id="percentage">
+        0%
+      </div>
+
+      <strong>
+        Đang triệu hồi script...
+      </strong>
+
+      <span>
+        Vui lòng đợi trong giây lát...
+      </span>
+
+      <div class="progress">
+        <div id="loaderBar"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =======================================================
+       HEADER
+  ======================================================== -->
+
+  <header class="site-header">
+    <div class="brand">
+      <span class="brand-mark">
+        🎃
+      </span>
+
+      <div>
+        <h1>
+          Script Hub
+        </h1>
+
+        <p>
+          Roblox Script Library · Halloween Edition
+        </p>
+      </div>
+    </div>
+
+
+    <div class="header-actions">
+      <button
+        class="guide-open-btn"
+        id="guideOpen"
+        type="button"
+      >
+        Hướng dẫn
+      </button>
+
+      <button
+        class="theme-toggle"
+        id="themeToggle"
+        type="button"
+        aria-label="Chuyển chế độ sáng tối"
+      >
+        <span class="theme-dot"></span>
+
+        <span data-role="theme-label">
+          Dark
+        </span>
+      </button>
+    </div>
+  </header>
+
+
+  <!-- =======================================================
+       MAIN
+  ======================================================== -->
 
   <main class="container">
-    <section class="card">
-      <div class="brand">
-        <div class="logo">D</div>
-        <div>
-          <h1>Donate</h1>
-          <p>Nạp thẻ cào nhanh chóng</p>
-        </div>
+
+    <!-- HERO -->
+
+    <section class="hero-intro">
+      <div>
+        <span class="eyebrow">
+          HALLOWEEN SCRIPT LIBRARY
+        </span>
+
+        <h2>
+          Kho báu ma quái
+        </h2>
+
+        <p>
+          Thêm script ở một nơi duy nhất.
+          Card, badge trạng thái, tìm kiếm
+          và modal sẽ tự render.
+        </p>
       </div>
 
-      <div id="alert" class="alert" hidden></div>
 
-      <form id="cardForm" autocomplete="off">
-        <label for="loaithe">Nhà mạng</label>
-        <select id="loaithe" name="loaithe" required>
-          <option value="" selected disabled>-- Chọn nhà mạng --</option>
-          <option value="VIETTEL">Viettel</option>
-          <option value="VINAPHONE">Vinaphone</option>
-          <option value="MOBIFONE">Mobifone</option>
-          <option value="VIETNAMOBILE">Vietnamobile</option>
-          <option value="GATE">Gate</option>
-        </select>
+      <div class="stats-box">
+        <strong id="totalScripts">
+          0
+        </strong>
 
-        <label for="menhgia">Mệnh giá</label>
-        <select id="menhgia" name="menhgia" required>
-          <option value="" selected disabled>-- Chọn mệnh giá --</option>
-          <option value="10000">10.000đ</option>
-          <option value="20000">20.000đ</option>
-          <option value="30000">30.000đ</option>
-          <option value="50000">50.000đ</option>
-          <option value="100000">100.000đ</option>
-          <option value="200000">200.000đ</option>
-          <option value="300000">300.000đ</option>
-          <option value="500000">500.000đ</option>
-        </select>
-
-        <label for="seri">Serial</label>
-        <input id="seri" name="seri" type="text" inputmode="numeric"
-               placeholder="Nhập số serial" maxlength="30" required>
-
-        <label for="mathe">Mã thẻ</label>
-        <input id="mathe" name="mathe" type="password" inputmode="numeric"
-               placeholder="Nhập mã thẻ" maxlength="40" required>
-
-        <button id="submitBtn" type="submit">
-          <span class="btn-text">Gửi thẻ</span>
-          <span class="spinner" aria-hidden="true"></span>
-        </button>
-      </form>
-
-      <div class="result" id="result" hidden>
-        <div class="result-icon" id="resultIcon">✓</div>
-        <div>
-          <strong id="resultTitle">Đã gửi</strong>
-          <p id="resultMessage"></p>
-          <small id="requestId"></small>
-        </div>
+        <span>
+          Scripts
+        </span>
       </div>
-
-      <p class="note">
-        Thẻ được gửi tới hệ thống xử lý sau khi bạn bấm “Gửi thẻ”.
-        Kiểm tra kỹ nhà mạng, mệnh giá, serial và mã thẻ trước khi gửi.
-      </p>
     </section>
+
+
+    <!-- TAB -->
+
+    <div
+      class="tab-bar"
+      role="tablist"
+      aria-label="Danh mục"
+    >
+      <button
+        class="tab-btn active"
+        data-tab="all"
+        role="tab"
+        aria-selected="true"
+        type="button"
+      >
+        <span>🎃</span>
+        Script
+        <b data-count="all">0</b>
+      </button>
+    </div>
+
+
+    <!-- SEARCH -->
+
+    <div class="search-wrap">
+      <div class="search-box">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="m20 20-4-4"></path>
+        </svg>
+
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Tìm script... (Blox Fruits, Aim, Farm...)"
+          autocomplete="off"
+          spellcheck="false"
+        >
+
+        <button
+          id="searchClear"
+          class="search-clear"
+          type="button"
+          hidden
+          aria-label="Xóa tìm kiếm"
+        >
+          ×
+        </button>
+      </div>
+
+      <p
+        id="searchEmpty"
+        class="search-empty"
+        hidden
+      >
+        Không tìm thấy script nào phù hợp.
+      </p>
+    </div>
+
+
+    <!-- SCRIPT GRID -->
+
+    <section
+      class="script-grid"
+      id="scriptGrid"
+      aria-live="polite"
+    ></section>
   </main>
 
+
+  <!-- =======================================================
+       FOOTER
+  ======================================================== -->
+
+  <footer class="site-footer">
+    <span>
+      Script Hub
+    </span>
+
+    <span>
+      ·
+    </span>
+
+    <span>
+      Happy Halloween 2026
+    </span>
+  </footer>
+
+
+  <!-- =======================================================
+       BACK TO TOP
+  ======================================================== -->
+
+  <button
+    class="back-to-top"
+    id="backToTop"
+    type="button"
+    aria-label="Lên đầu trang"
+  >
+    ↑
+  </button>
+
+
+  <!-- =======================================================
+       SCRIPT CONTENT MODAL
+  ======================================================== -->
+
+  <div
+    class="modal-overlay"
+    id="scriptModal"
+    aria-hidden="true"
+  >
+    <div
+      class="script-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="scriptModalTitle"
+    >
+      <div class="modal-head">
+        <div>
+          <span class="eyebrow">
+            SCRIPT CONTENT
+          </span>
+
+          <h3 id="scriptModalTitle">
+            Script
+          </h3>
+        </div>
+
+        <button
+          class="modal-close"
+          data-close-modal
+          type="button"
+          aria-label="Đóng"
+        >
+          ×
+        </button>
+      </div>
+
+
+      <div
+        class="modal-meta"
+        id="scriptModalMeta"
+      ></div>
+
+
+      <pre><code id="scriptContent"></code></pre>
+
+
+      <div class="modal-actions">
+        <button
+          class="btn primary"
+          id="modalCopy"
+          type="button"
+        >
+          Copy Script
+        </button>
+
+        <button
+          class="btn secondary"
+          data-close-modal
+          type="button"
+        >
+          Đóng
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =======================================================
+       GUIDE MODAL
+  ======================================================== -->
+
+  <div
+    class="modal-overlay"
+    id="guideOverlay"
+    aria-hidden="true"
+  >
+    <div
+      class="guide-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="guideTitle"
+    >
+      <div class="modal-head">
+        <div>
+          <span class="eyebrow">
+            SETUP
+          </span>
+
+          <h3 id="guideTitle">
+            Cách dùng
+          </h3>
+        </div>
+
+        <button
+          class="modal-close"
+          id="guideClose"
+          type="button"
+          aria-label="Đóng"
+        >
+          ×
+        </button>
+      </div>
+
+
+      <div class="guide-body">
+        <div class="guide-step">
+          <b>1.</b>
+          <span>
+            Mở card script bạn muốn và chọn
+            <strong>View Content</strong>
+            để xem nội dung.
+          </span>
+        </div>
+
+        <div class="guide-step">
+          <b>2.</b>
+          <span>
+            Nhấn
+            <strong>Copy Script</strong>
+            để chép toàn bộ nội dung vào clipboard.
+          </span>
+        </div>
+
+        <div class="guide-step">
+          <b>3.</b>
+          <span>
+            Thêm script mới bằng cách chỉnh
+            mảng <code>SCRIPTS</code>
+            trong file <code>script.js</code>.
+          </span>
+        </div>
+
+        <div class="guide-step">
+          <b>4.</b>
+          <span>
+            Đổi trạng thái trong
+            <code>MAINTENANCE_MODE</code>:
+            <code>true</code> = tắt script,
+            <code>false</code> = bật script.
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- =======================================================
+       JS
+  ======================================================== -->
+
   <script src="script.js"></script>
+
 </body>
 </html>
